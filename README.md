@@ -103,15 +103,6 @@ VI. Analysis
 Infrastructure will be provisioned in Azure using Azure Bicep.
 CI/CD will be implemented for the infrastructure as well.
 
-Installation:
-
-1. Navigate to `./Installer/`
-1. Modify the `parameters.json` file
-1. If you have your own SSL Certificate and PFX files, put it inside `./Installer/certs` all file extensions must have the name `endpoint-ssl.*`
-1. Try your code: `sh install.sh <location> what-if`
-1. Deploy your code: `sh install.sh <location> create`
-1. Head to [TEST](TESTING.md) documentation to test your environment.
-
 ## Infrastructure CI/CD
 
 ![INFRA-ADO](Diagrams/DevOps/2-INFRA-ADO.jpg)

@@ -15,6 +15,32 @@ param virtualNetworDnsZoneName string
 @description('Regional Location')
 param location string = resourceGroup().location
 
+@description('IP Address range of the Client')
+param clientIp string = ''
+
+resource networkSecurityGroup 'Microsoft.Network/networkSecurityGroups@2019-11-01' = {
+  name: 'app-gateway'
+  location: location
+  properties: {
+    securityRules: [
+      {
+        name: 'agw-default-rule'
+        properties: {
+          description: 'Allow Client IP.'
+          protocol: 'Tcp'
+          sourcePortRange: '*'
+          destinationPortRange: '*'
+          sourceAddressPrefix: clientIp
+          destinationAddressPrefix: '*'
+          access: 'Allow'
+          priority: 100
+          direction: 'Inbound'
+        }
+      }
+    ]
+  }
+}
+
 resource virtualNetwork 'Microsoft.Network/virtualNetworks@2021-02-01' = {
   name: virtualNetworkName
   location: location
@@ -70,6 +96,9 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2021-02-01' = {
       {
         name: 'Application'
         properties: {
+          networkSecurityGroup: {
+            id: networkSecurityGroup.id
+          }
           addressPrefix: virtualNetworkConfig.CidrAppSubnet
           privateEndpointNetworkPolicies: 'Disabled'
           serviceEndpoints: [

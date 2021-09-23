@@ -18,6 +18,8 @@ param NetworkConfig object
 param DefaultTags object
 @description('IP Address of Admin or Owner')
 param AdminIp string = ''
+@description('IP Address range of the Client')
+param ClientIp string = ''
 @allowed([
   'southeastasia'
 ])
@@ -61,6 +63,7 @@ module virtualNetworkModule './Modules/virtualNetwork.bicep' = {
     virtualNetworkConfig: virtualNetworkConfig
     virtualNetworDnsZoneName: virtualNetworDnsZoneName
     location: Location
+    clientIp: ClientIp
   }
 }
 
@@ -100,7 +103,7 @@ module applicationGateway 'Modules/applicationGateway.bicep' = {
       id: appGatewayPublicIpModule.outputs.id
       ipAddress: appGatewayPublicIpModule.outputs.ipAddress
       fqdn: appGatewayPublicIpModule.outputs.fqdn
-    }    
+    }
   }
 }
 

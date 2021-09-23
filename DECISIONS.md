@@ -19,3 +19,9 @@ I utilized Azure Private Endpoint as well to make sure that all network interfac
 Azure Application Gateway is used as the reverse proxy which can be secured via NSG attached in its subnet.
 
 Azure Firewall is used as a backend access for the Admin endpoints such as the CosmosDB and SFTP.
+
+## Known Issues
+
+1. App Gateway Cannot whitelist IP Addresses
+1. SSL Termination for Firewall and App Gateway Transactions
+1. A Better way to deploy Apps

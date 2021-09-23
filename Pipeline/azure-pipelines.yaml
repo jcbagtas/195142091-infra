@@ -40,6 +40,7 @@ stages:
 
 - stage: Deploy
   displayName: "Deploy"
+  condition: eq(variables['Build.Reason'], 'PullRequest')
   jobs:
     - deployment:
       pool: default
@@ -82,6 +83,7 @@ stages:
                   az deployment sub create -l "$location" -n "$deploymentName" --template-file "$templateFile" --parameters "$params"
 - stage: Test
   displayName: "Test Deployment"
+  condition: eq(variables['Build.Reason'], 'PullRequest')
   jobs:
   - job: "TestDeployment"
     pool: default

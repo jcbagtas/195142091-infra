@@ -1,0 +1,115 @@
+
+stages:
+- stage: Build
+  displayName: "Prepare Project"
+  jobs:
+  - job: "WhatIf"
+    pool: default
+    displayName: "What If"
+    steps:
+    - checkout: "195142091-infra"
+    - checkout: self
+    - script: |
+            echo "LS after mag checkout"
+            echo I am in $(pwd)
+            ls
+
+            if ! type "jq" > /dev/null; then
+                echo please install jq
+                return 1
+            fi
+            if ! type "az" > /dev/null; then
+                echo please install azure cli
+                return 1
+            fi
+
+            project="$(Build.Repository.Name)"
+            infra="195142091-infra"
+
+            params=${project}/parameters.json
+            templateFile="${infra}/Infrastructure/main.bicep"
+            deploymentName="deployment-$(date '+%s')"
+
+            projectName=$(cat $params | jq -cr ".parameters.ProjectName.value")
+            location=$(cat $params | jq -cr ".parameters.Location.value")
+
+            mkdir -p "${infra}/Installer"
+            cp -r "${project}/SSL" "${infra}/Installer/certs"
+            
+            az deployment sub what-if -l "$location" -n "$deploymentName" --template-file "$templateFile" --parameters "$params" --result-format ResourceIdOnly
+
+- stage: Deploy
+  displayName: "Deploy"
+  jobs:
+    - deployment:
+      pool: default
+      environment: 'AppServiceCreator'
+      strategy: 
+        runOnce:
+          deploy:
+            steps:
+              - checkout: "195142091-infra"
+              - checkout: self
+              - script: |
+                  echo "LS after mag checkout"
+                  echo I am in $(pwd)
+                  ls
+
+                  if ! type "jq" > /dev/null; then
+                      echo please install jq
+                      return 1
+                  fi
+                  if ! type "az" > /dev/null; then
+                      echo please install azure cli
+                      return 1
+                  fi
+
+                  project="$(Build.Repository.Name)"
+                  infra="195142091-infra"
+
+                  params=${project}/parameters.json
+                  templateFile="${infra}/Infrastructure/main.bicep"
+                  deploymentName="deployment-$(date '+%s')"
+
+                  projectName=$(cat $params | jq -cr ".parameters.ProjectName.value")
+                  location=$(cat $params | jq -cr ".parameters.Location.value")
+
+                  mkdir -p "${infra}/Installer"
+                  cp -r "${project}/SSL" "${infra}/Installer/certs"
+                  
+                  echo "Deploying to ${projectName}-rg this might take around 15-30mins"
+
+                  az deployment sub create -l "$location" -n "$deploymentName" --template-file "$templateFile" --parameters "$params"
+- stage: Test
+  displayName: "Test Deployment"
+  jobs:
+  - job: "TestDeployment"
+    pool: default
+    displayName: "Test Using Sample Apps"
+    steps:
+      - checkout: "195142091-infra"
+      - checkout: self
+      - script: |
+          bash --version
+          pwd
+          ls
+
+          project="$(Build.Repository.Name)"
+          infra="195142091-infra"
+          params=${project}/parameters.json
+
+          ls "$project"
+          ls "$infra"
+          ls "$params"
+
+          if [ -f "$params" ];then
+            cd "${infra}/Test/"
+            bash ./test-via-pipeline.sh "../../$params"
+            cat test-results.json
+            mv test-results.json $(System.DefaultWorkingDirectory)/
+          else
+            echo "No Parameter File"
+            exit 1
+          fi
+      - publish: $(System.DefaultWorkingDirectory)/test-results.json
+        artifact: TestResult

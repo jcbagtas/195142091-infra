@@ -79,7 +79,7 @@ externalNodeMongo="Invalid"
 echo "CHECK PRIVATE ASSETS PRIVACY"
 
 # CHECK INTERNAL PYTHON AND NODE APPS ACCESS
-
+echo "CHECK INTERNAL PYTHON AND NODE APPS ACCESS"
 internalPy=$(curl -i -s -k https://${projectName}-test-internal-webapp-python-1.azurewebsites.net/ | grep -c "HTTP/2 403")
 internalNo=$(curl -i -s -k https://${projectName}-test-internal-webapp-python-1.azurewebsites.net/ | grep -c "HTTP/2 403")
 
@@ -90,7 +90,7 @@ if [ $internalTotal -eq 2 ];then
 fi
 
 # CHECK INTERNAL COSMOSDB-MONGODB ACCESS
-
+echo "CHECK INTERNAL COSMOSDB-MONGODB ACCESS"
 internalMongo=$(mongosh ${projectName}-test-account.mongo.cosmos.azure.com:10255 -u ${projectName}-test-account -p $mongoPass --tls --tlsAllowInvalidCertificates)
 
 internalMongoTotal=$(echo $internalMongo | grep -c "direct: primary] test")
@@ -101,8 +101,8 @@ if [ $internalMongoTotal -eq 0 ];then
     internalMongoDbAccess="Private"
 fi
 
-
-echo "CHECK PUBLIC ASSETS PRIVACY"
+# CHECK PUBLIC ASSETS
+echo "CHECK PUBLIC ASSETS"
 
 externalPy=$(curl -i -s -k https://${projectName}-test-public-gateway.southeastasia.cloudapp.azure.com/node/ | grep -c "HTTP/2 200")
 externalNo=$(curl -i -s -k https://${projectName}-test-public-gateway.southeastasia.cloudapp.azure.com/python/ | grep -c "HTTP/2 200")
@@ -110,11 +110,11 @@ externalNo=$(curl -i -s -k https://${projectName}-test-public-gateway.southeasta
 externalTotal=$((externalPy + externalNo))
 
 if [ $externalTotal -eq 2 ];then
-    externalAppAccess="Accessible via Firewall"
+    externalAppAccess="Accessible via App Gateway"
 fi
 
 # CHECK EXTERNAL COSMOSDB-MONGODB ACCESS
-
+echo "CHECK EXTERNAL COSMOSDB-MONGODB ACCESS"
 externalMongo=$(echo exit | mongosh ${projectName}-test-fw-backend.southeastasia.cloudapp.azure.com:10255 -u ${projectName}-test-account -p $mongoPass --tls --tlsAllowInvalidCertificates)
 
 externalMongoTotal=$(echo $externalMongo | grep -c "direct: primary] test")
@@ -126,7 +126,7 @@ if [ $externalMongoTotal -eq 1 ];then
 fi
 
 # CHECK EXTERNAL PYTHON MONGO APPS ACCESS
-
+echo "CHECK EXTERNAL PYTHON MONGO APPS ACCESS"
 externalPyMong1=$(curl -i -s -k https://${projectName}-test-public-gateway.southeastasia.cloudapp.azure.com/python/privip1 | grep -c "HTTP/2 200")
 externalPyMong2=$(curl -i -s -k https://${projectName}-test-public-gateway.southeastasia.cloudapp.azure.com/python/privip2 | grep -c "HTTP/2 200")
 
@@ -143,7 +143,11 @@ if [ $externalNoMongTotal -eq 2 ];then
     externalNodeMongo="Accessible via Firewall"
 fi
 
-referenceUrls="https://${projectName}-test-public-gateway.southeastasia.cloudapp.azure.com/python/privip1, https://${projectName}-test-public-gateway.southeastasia.cloudapp.azure.com/python/privip2, https://${projectName}-test-public-gateway.southeastasia.cloudapp.azure.com/node/privip1, https://${projectName}-test-public-gateway.southeastasia.cloudapp.azure.com/node/privip2, ${projectName}-test-fw-backend.southeastasia.cloudapp.azure.com:10255"
+# CHECK SFTP
+echo "CHECK SFTP"
+echo "Please check SFTP Manually. ${projectName}-test-fw-backend.southeastasia.cloudapp.azure.com:2222"
+
+referenceUrls="https://${projectName}-test-public-gateway.southeastasia.cloudapp.azure.com/python/privip1, https://${projectName}-test-public-gateway.southeastasia.cloudapp.azure.com/python/privip2, https://${projectName}-test-public-gateway.southeastasia.cloudapp.azure.com/node/privip1, https://${projectName}-test-public-gateway.southeastasia.cloudapp.azure.com/node/privip2, ${projectName}-test-fw-backend.southeastasia.cloudapp.azure.com:10255, ${projectName}-test-fw-backend.southeastasia.cloudapp.azure.com:2222"
 
 jq -n --arg internalAppAccess "$internalAppAccess" --arg internalMongoDbAccess "$internalMongoDbAccess" --arg externalAppAccess "$externalAppAccess" --arg externalMongoDbAccess "$externalMongoDbAccess" --arg externalPythonMongo "$externalPythonMongo" --arg externalNodeMongo "$externalNodeMongo" --arg referenceUrls "$referenceUrls" '{result: {internalAppAccess:$internalAppAccess, internalMongoDbAccess:$internalMongoDbAccess, externalAppAccess: $externalAppAccess, externalMongoDbAccess:$externalMongoDbAccess, externalPythonMongo:$externalPythonMongo, externalNodeMongo:$externalNodeMongo, referenceUrls:$referenceUrls}}' > test-results.json
 

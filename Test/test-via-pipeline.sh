@@ -127,6 +127,8 @@ fi
 
 # CHECK EXTERNAL PYTHON MONGO APPS ACCESS
 echo "CHECK EXTERNAL PYTHON MONGO APPS ACCESS"
+echo "Sleeping for 30 seconds for the Initial Deployments to stabalize..."
+sleep 30
 externalPyMong1=$(curl -i -s -k https://${projectName}-test-public-gateway.southeastasia.cloudapp.azure.com/python/privip1 | grep -c "HTTP/2 200")
 externalPyMong2=$(curl -i -s -k https://${projectName}-test-public-gateway.southeastasia.cloudapp.azure.com/python/privip2 | grep -c "HTTP/2 200")
 

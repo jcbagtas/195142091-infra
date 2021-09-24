@@ -36,7 +36,7 @@ stages:
             mkdir -p "${infra}/Installer"
             cp -r "${project}/SSL" "${infra}/Installer/certs"
             
-            az deployment sub what-if -l "$location" -n "$deploymentName" --template-file "$templateFile" --parameters "$params" --result-format ResourceIdOnly
+            az deployment sub what-if -l "$location" -n "$deploymentName" --template-file "$templateFile" --parameters "$params"
 
 - stage: Deploy
   displayName: "Deploy"

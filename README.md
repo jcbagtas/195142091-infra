@@ -94,7 +94,13 @@ VI. Analysis
 
 - Azure Elastic Cloud
 
-![PROD-ARCHI](Diagrams/Architecture/4-ENVIRONMENT.jpg)
+### Test Environment
+
+![TEST-ARCHI](Diagrams/Architecture/1-ENVIRONMENT.jpg)
+
+### Acceptance & Production Environment
+
+![PROD-ARCHI](Diagrams/Architecture/2-PRODUCTION.jpg)
 
 ---
 

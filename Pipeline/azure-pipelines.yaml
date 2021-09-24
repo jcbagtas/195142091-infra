@@ -83,7 +83,7 @@ stages:
                   az deployment sub create -l "$location" -n "$deploymentName" --template-file "$templateFile" --parameters "$params"
 - stage: Test
   displayName: "Test Deployment"
-  condition: eq(variables['Build.Reason'], 'PullRequest')
+  condition: and(eq(variables['Build.Reason'], 'PullRequest'),succeeded('Deploy'))
   jobs:
   - job: "TestDeployment"
     pool: default
